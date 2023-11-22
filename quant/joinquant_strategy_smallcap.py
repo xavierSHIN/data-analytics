@@ -1,4 +1,5 @@
 from luffy._luffy_func import filePath, CONFIG_PATH
+from luffy._pandas_seaborn_func import plot_line_chart
 from jqdatasdk import *
 import tushare as ts
 import numpy as np
@@ -44,10 +45,12 @@ def initializer():
 
 def get_smallcap_data():
 
-    all_securities = get_all_securities(types=['stock'], date=None)
+    #all_securities = get_all_securities(types=['stock'], date=None)
+    all_securities = pd.read_csv(os.path.join(filePath,'all_securities.csv'))
+    #all_indexes= get_all_securities(types=['index'], date=None)
     len(all_securities)
-    all_securities.reset_index(drop=False, inplace=True)
-    all_securities.rename(columns={'index': 'code'}, inplace=True)
+    #all_securities.columns
+    all_securities.rename(columns={'Unnamed: 0': 'code'}, inplace=True)
     q_2 = query(
         valuation.code,
         valuation.market_cap
@@ -68,7 +71,6 @@ def get_smallcap_data():
     fullData = pd.concat(aList, sort=False)
     fullData.sort_values(by='fetch_date', ascending=True, inplace=True)
     fullData = fullData.merge(all_securities[['code', 'display_name']], how='left', on='code')
-    # fullData.dtypes
 
     return fullData
 
@@ -76,11 +78,19 @@ def get_smallcap_data():
 
 def get_price_data(fullData):
 
-
+    start_date = fullData['fetch_date'][0]
+    end_date = fullData['fetch_date'].tolist()[-1]
     fullData['sell_code'] = fullData['code'].shift(3)
     field_list = ['open', 'close', 'low', 'high', 'volume', 'money', 'factor'
-        , 'high_limit', 'low_limit', 'avg', 'pre_close', 'paused']
-
+        , 'high_limit', 'low_limit'
+        , 'avg', 'pre_close', 'paused']
+    df_index = get_price(security= '000300.XSHG'
+                       , start_date= start_date
+                       , end_date= end_date + datetime.timedelta(days=1, minutes=-1)
+                       , frequency='daily'
+                       , fields=field_list
+                       , skip_paused=False, fq='pre'
+                       , count=None, round=True)
     for index, row in fullData.iterrows():
         print(index, row['display_name'])
         df_buy = get_price(security=row['code']
@@ -121,7 +131,7 @@ def get_price_data(fullData):
         profitData.reset_index(drop=True, inplace=True)
 
 
-    return profitData
+    return profitData, df_index
 
 ##------------------------------ partIV, profit analysis -------------------------------------##
 
@@ -144,13 +154,11 @@ def get_profit_data(pData, cost, commission_rate):
     return pData
 
 
-
-
 if __name__ == '__main__':
 
     initializer()
     fullData = get_smallcap_data()
-    profitData = get_price_data(fullData)
+    profitData, df_index = get_price_data(fullData)
     aList = []
     N = 3
     for j in range(N):
@@ -162,8 +170,30 @@ if __name__ == '__main__':
         aList.append(pData_1)
     aData = pd.concat(aList, sort=False)
     aData.sort_values(by=['fetch_date', 'type'], ascending=[True, False], inplace=True)
+    bData = aData.loc[aData.type == 'sell', :].groupby('fetch_date').agg({'net_worth': lambda q: (sum(q)-10000)/10000})
+    bData = bData.merge(df_index['open'], how='left', left_index=True, right_index=True).reset_index(drop=False)
+    start_date = fullData['fetch_date'][0]
+    start_point = df_index.loc[start_date, 'open']
+    bData['benchmark'] = (bData['open'] - start_point)/bData['open']
     profit_pct = (sum(aData.loc[len(aData)-3:, 'net_worth']) -10000)/10000
     print(f"profit_pct: {round(profit_pct *100,2)} %")
+
+##------------------------------ partV, two line plot -------------------------------------##
+    tataDict = {
+        'strategy': bData['net_worth']
+        , 'benchmark': bData['benchmark']
+        , 'x': bData['fetch_date']
+        , 'xlabel': 'fetch_date'
+        , 'ylabel': 'pct%'
+        , 'type': 'plot'
+        , 'nbins': ''
+        , 'suptitle': 'smallcap_strategy_vs_benchmark'
+        , 'title': ''
+    }
+    plot_line_chart(tataDict)
+
+
+
 
 
 
