@@ -1,0 +1,100 @@
+https://zhuanlan.zhihu.com/p/39277742
+
+Q): whats the machines learning?
+A):
+事实上，整个机器学习的过程就是在干一件事，即通过训练，学习得到某个模型
+，然后期望这个模型也能很好地适用于“新样本”（即预测）。
+这种模型适用于新样本的能力，也称为“泛化能力”，它是机器学习算法非常重要的性质。
+
+Q): ML tristeps is?
+A):
+    1.several functions, realize the effect that X--> f(X)
+    this is the mdling problem, method like CNN, RNN, SVM
+    2. measurement & judgment function, to tell hw the performance improves?
+    3. optimization, hw to get the best function most efficiently? such as BP
+
+Q): whats the supervised, un-supervised, semi-supervised learning?
+A):
+supervised learning is the classification, categorized
+, and there is a def answer to rectify the learning process (教师信号）
+
+un-supervised learning is the cluster,
+
+re-inforcement leanring, dont tell the process right or wrong
+, it is just giving the positive incentive when the performance improves
+, 它重视的是环境给予的反馈。
+
+
+Q): McCulloch-Pitts neuron mdl (fundamental.Classic mdl)
+A):
+    y = FUNCa(sum(wi* xi) - thita), the FUNCa is activation function,
+    the diff w (weight) is how i neurons connected each other to form the neural network
+    神经元突触的接触程度
+    , and diff x is the input signals going thru i neurons, in which they sum up to form a total signal,
+    电信号刺激
+    after passing the threshold (thita), it activates the function of the current neuron.
+    神经元会产生兴奋或者不兴奋的二元状态
+    This process is called perceptron. (感知机）
+    MP模型就是把人脑抽象成二元的神经元网络传递电信号的过程！
+    大脑不过就是一个信息处理器。
+
+Q): Perceptrons definition
+A):
+    y = f(x) = W* X- thita
+    features X are vectors group, connected to each other by weights W,
+    and perceptron is a Hyperplane under N dimensions space,
+    the two side of it can be the activation and deactivation (0/1)
+    in supervised learning of binary classification.
+
+    Negative feedback mechanism(a perturbation and its response will be in the opposite direction)
+    is that when the expected output doesnt meet the actuals
+    , the perceptron system will adjust the weights & thita (threshold) for a better result
+
+Q): 多层前馈神经网络(multi-layer feedforward neural networks)
+A):
+    multi-layer 多层, it has input layer, hidden layer(computations), output layer,
+    feedforward 前馈，it means the flow of the network is from input to output units
+    , and it does not have any loops, no feedback, and no signal moves in backward directions
+sigmoid 是激活函数的一种
+
+
+Q): 损失函数(loss function)
+A):
+loss func is the difference between the actual f(x) and predicted f(x) under supervised learning.
+by checking the loss function, then to adjust the weights thru network, this method is called BP (back- propagating)
+, BUT, this BP method has a flaw that as the network getting more layers, the info will turn into entropy
+, then there is no power that can change the weights, as such, the total layer is less than 7
+Whereas, deep learning can exceed 7 layers, cuz it use a diff method! called (layer-wise pre-training)
+
+
+Q): 梯度（gradient)
+A): 对于函数的某个特定点，它的梯度就表示从该点出发，
+    函数值增长最为迅猛的方向（direction of greatest increase of a function）
+    , 而在损失函数里，我们需要寻找其最小值，所以要用梯度递减的方法 （negative gradient)
+    , 可以用BGD, 或者SGD 方法，但无论如何都是为了找到一组 Weights 和 Theta 阈值，让Loss 达到最小
+
+
+Q): 反向传播 （Back Propogating, BP)
+A):
+    损失函数的关于Weights的函数，为了使它最小，我们要求它的梯度：
+    Gradient(Loss Function) = partial_derivatives(each Weighti), 损失函数的梯度就是所有Weight的偏导
+    通过计算每一步（学习率，参数η）的梯度，来调整Weight，
+    ## 学习率（learning rate)，它决定了梯度递减搜索的步长
+    new Weights = old Weights + learning_rate * gradient(loss F)
+    ， 利用反向模式的微分方法，可以降低运算量 O(n2)--> O(n)
+    （1）正向传播输入信息，实现分类功能（所有的有监督学习，在本质都可以归属于分类）；
+    （2）反向传播误差，调整网络权值。
+
+
+Q): 如果得到这个损失最小化的函数呢？ 我们将要介绍让这个函数值最小的算法，大致分为三步循环走。
+A):
+    (1) 损失是否足够小？如果不是，计算损失函数的梯度；
+    (2) 按梯度的反方向走一小步，以缩小损失；
+    (3) 循环到(1)。
+
+
+Q): 框架
+1, 最常见的问题是 supervised learning, such as if he buy or not, this is a cat or dog,
+2, 无论如何设计神经网络NN， 他都涉及到一个LOss Func去判断然后改进performance,
+3, 为了使Loss F 取得极小值，我们需要计算梯度（递减），用反向传播的方法逐渐调整权值，直到Loss F最满意
+4, pyTorch 就是帮我们计算BP/Grad的库
